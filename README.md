@@ -3,10 +3,20 @@
 Project bahasa C untuk tugas besar PMP.
 
 ## Compile
-
+# Mode Interaktif
+Untuk menjalankan aplikasi sistem inventaris dengan menu CLI interaktif:
 ```bash
-make
 make run
+```
+# Mode Testbench
+Untuk menjalankan pengujian komprehensif dari file testcase.txt dan menghasilkan laporan di test/output/result.txt:
+```bash
+make run_test
+```
+# Clean Build
+Untuk membersihkan file eksekusi (compiled files) dan riwayat output test:
+```bash
+make clean
 ```
 
 # How to Commit
