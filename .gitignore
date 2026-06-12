@@ -1,0 +1,15 @@
+# OS generated files (khususnya buat Mac lu nih)
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Compiled executables & build artifacts
+*.exe
+*.out
+*.app
+*.o
+build/
+*.dSYM/
+
+# Test output results (biar history log nggak berantakan tiap kali run test)
+test/output/*.txt
