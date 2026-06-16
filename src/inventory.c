@@ -1,7 +1,8 @@
 #include <string.h>
-#include "../include/inventory.h"
-#include "../include/memory.h"
-#include "../include/validation.h"
+#include "inventory.h"
+#include "memory.h"
+#include "validation.h"
+#include "data.h"
 
 void tambahItem(List *L, item data, int *status){
     int duplicate;
@@ -30,7 +31,6 @@ void tambahStok(List L, char id[], int jumlah, int *status){
     curr = L;
     while(curr != NULL){
         if(strcmp(curr->id, id) == 0){
-            curr->stokTotal += jumlah;
             curr->tersedia += jumlah;
             *status = 0;
             return;
@@ -55,7 +55,6 @@ void kurangiStok(List L, char id[], int jumlah, int *status){
                 *status = 3;
                 return;
             }
-            curr->stokTotal -= jumlah;
             curr->tersedia -= jumlah;
             *status = 0;
             return;

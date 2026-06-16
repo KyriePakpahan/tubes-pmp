@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#include "../include/memory.h"
+#include "memory.h"
 
 void insertLast(List *L, item data, int *status){
     List baru, curr;
@@ -9,17 +9,7 @@ void insertLast(List *L, item data, int *status){
         *status = 5;
         return;
     }
-    strcpy(baru->id, data.id);
-    strcpy(baru->nama, data.nama);
-    strcpy(baru->kategori, data.kategori);
-    strcpy(baru->lokasi, data.lokasi);
-    strcpy(baru->pemilik, data.pemilik);
-    strcpy(baru->pic, data.pic);
-    baru->stokTotal = data.stokTotal;
-    baru->tersedia = data.tersedia;
-    baru->dipinjam = data.dipinjam;
-    baru->rusak = data.rusak;
-    baru->habis = data.habis;
+    memcpy(baru, &data, sizeof(item));
     baru->next = NULL;
     if(*L == NULL){
         *L = baru;

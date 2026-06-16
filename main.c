@@ -1,9 +1,22 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "./include/data.h"
 #include "./include/memory.h"
 #include "./include/validation.h"
 #include "./include/inventory.h"
+
+// ANSI Color Escape Codes
+#define ANSI_RESET   "\033[0m"
+#define ANSI_BOLD    "\033[1m"
+#define ANSI_RED     "\033[31m"
+#define ANSI_GREEN   "\033[32m"
+#define ANSI_YELLOW  "\033[33m"
+#define ANSI_BLUE    "\033[34m"
+#define ANSI_MAGENTA "\033[35m"
+#define ANSI_CYAN    "\033[36m"
+#define ANSI_WHITE   "\033[37m"
+#define ANSI_GRAY    "\033[90m"
 
 void hapusEnter(char teks[]){
     int i = 0;
@@ -19,28 +32,28 @@ void hapusEnter(char teks[]){
 void tampilStatus(int status){
     switch(status){
         case 0:
-            printf("\nOperasi berhasil.\n");
+            printf("\n" ANSI_BOLD ANSI_GREEN "✔ SUCCESS: Operasi berhasil." ANSI_RESET "\n");
             break;
         case 1:
-            printf("\nID tidak ditemukan.\n");
+            printf("\n" ANSI_BOLD ANSI_RED "✘ ERROR: ID tidak ditemukan." ANSI_RESET "\n");
             break;
         case 2:
-            printf("\nJumlah tidak valid.\n");
+            printf("\n" ANSI_BOLD ANSI_RED "✘ ERROR: Jumlah tidak valid." ANSI_RESET "\n");
             break;
         case 3:
-            printf("\nStok tidak mencukupi.\n");
+            printf("\n" ANSI_BOLD ANSI_RED "✘ ERROR: Stok tidak mencukupi." ANSI_RESET "\n");
             break;
         case 4:
-            printf("\nID sudah terdaftar.\n");
+            printf("\n" ANSI_BOLD ANSI_RED "✘ ERROR: ID sudah terdaftar." ANSI_RESET "\n");
             break;
         case 5:
-            printf("\nMemori penuh.\n");
+            printf("\n" ANSI_BOLD ANSI_RED "✘ ERROR: Memori penuh." ANSI_RESET "\n");
             break;
         case 6:
-            printf("\nJumlah pengembalian melebihi jumlah yang dipinjam.\n");
+            printf("\n" ANSI_BOLD ANSI_RED "✘ ERROR: Jumlah pengembalian melebihi jumlah yang dipinjam." ANSI_RESET "\n");
             break;
         case 7:
-            printf("\nItem masih dipinjam sehingga tidak dapat dihapus.\n");
+            printf("\n" ANSI_BOLD ANSI_RED "✘ ERROR: Item masih dipinjam sehingga tidak dapat dihapus." ANSI_RESET "\n");
             break;
     }
 }
@@ -52,59 +65,53 @@ int main(){
     int menu;
     int status;
     int jumlah;
-    char id[15];
+    char id[8];
 
     do{
         printf("\n");
-        printf("=====================================\n");
-        printf("      SISTEM INVENTARIS LAB\n");
-        printf("=====================================\n");
-        printf("1. Tambah Item\n");
-        printf("2. Hapus Item\n");
-        printf("3. Cari Item\n");
-        printf("4. Tampilkan Semua Item\n");
-        printf("5. Tambah Stok\n");
-        printf("6. Kurangi Stok\n");
-        printf("7. Pinjam Item\n");
-        printf("8. Kembalikan Item\n");
-        printf("9. Tandai Rusak\n");
-        printf("10. Tandai Habis\n");
-        printf("11. Ringkasan Inventaris\n");
-        printf("0. Keluar\n");
-        printf("=====================================\n");
-        printf("Pilihan : ");
+        printf(ANSI_GRAY "┌────────────────────────────────────────────────────────┐" ANSI_RESET "\n");
+        printf(ANSI_GRAY "│" ANSI_RESET "                 " ANSI_BOLD ANSI_CYAN "SISTEM INVENTARIS LAB" ANSI_RESET "                  " ANSI_GRAY "│" ANSI_RESET "\n");
+        printf(ANSI_GRAY "├────────────────────────────────────────────────────────┤" ANSI_RESET "\n");
+        printf(ANSI_GRAY "│" ANSI_RESET "  [" ANSI_CYAN "1" ANSI_RESET "] Tambah Item            [" ANSI_CYAN "7" ANSI_RESET "] Pinjam Item           " ANSI_GRAY "│" ANSI_RESET "\n");
+        printf(ANSI_GRAY "│" ANSI_RESET "  [" ANSI_CYAN "2" ANSI_RESET "] Hapus Item             [" ANSI_CYAN "8" ANSI_RESET "] Kembalikan Item       " ANSI_GRAY "│" ANSI_RESET "\n");
+        printf(ANSI_GRAY "│" ANSI_RESET "  [" ANSI_CYAN "3" ANSI_RESET "] Cari Item              [" ANSI_CYAN "9" ANSI_RESET "] Tandai Rusak          " ANSI_GRAY "│" ANSI_RESET "\n");
+        printf(ANSI_GRAY "│" ANSI_RESET "  [" ANSI_CYAN "4" ANSI_RESET "] Tampilkan Semua        [" ANSI_CYAN "10" ANSI_RESET "] Tandai Habis         " ANSI_GRAY "│" ANSI_RESET "\n");
+        printf(ANSI_GRAY "│" ANSI_RESET "  [" ANSI_CYAN "5" ANSI_RESET "] Tambah Stok            [" ANSI_CYAN "11" ANSI_RESET "] Ringkasan            " ANSI_GRAY "│" ANSI_RESET "\n");
+        printf(ANSI_GRAY "│" ANSI_RESET "  [" ANSI_CYAN "6" ANSI_RESET "] Kurangi Stok           [" ANSI_RED "0" ANSI_RESET "] Keluar                " ANSI_GRAY "│" ANSI_RESET "\n");
+        printf(ANSI_GRAY "└────────────────────────────────────────────────────────┘" ANSI_RESET "\n");
+        printf(ANSI_BOLD "Pilihan : " ANSI_RESET);
 
         scanf("%d", &menu);
         getchar();
 
         switch(menu){
             case 1:
-                printf("\nID Item : ");
-                fgets(data.id, 15, stdin);
+                printf("\n" ANSI_BOLD ANSI_CYAN ">>> TAMBAH ITEM BARU <<<" ANSI_RESET "\n");
+                printf("ID Item   : ");
+                fgets(data.id, sizeof(data.id), stdin);
                 hapusEnter(data.id);
                 printf("Nama Item : ");
-                fgets(data.nama, 50, stdin);
+                fgets(data.nama, sizeof(data.nama), stdin);
                 hapusEnter(data.nama);
-                printf("Kategori : ");
-                fgets(data.kategori, 30, stdin);
+                printf("Kategori  : ");
+                fgets(data.kategori, sizeof(data.kategori), stdin);
                 hapusEnter(data.kategori);
-                printf("Lokasi : ");
-                fgets(data.lokasi, 30, stdin);
+                printf("Lokasi    : ");
+                fgets(data.lokasi, sizeof(data.lokasi), stdin);
                 hapusEnter(data.lokasi);
-                printf("Pemilik : ");
-                fgets(data.pemilik, 50, stdin);
+                printf("Pemilik   : ");
+                fgets(data.pemilik, sizeof(data.pemilik), stdin);
                 hapusEnter(data.pemilik);
-                printf("PIC : ");
-                fgets(data.pic, 50, stdin);
+                printf("PIC       : ");
+                fgets(data.pic, sizeof(data.pic), stdin);
                 hapusEnter(data.pic);
                 printf("Stok Awal : ");
-                scanf("%d", &data.stokTotal);
+                scanf("%hd", &data.tersedia);
                 getchar();
-                if(data.stokTotal <= 0){
-                    printf("\nStok awal harus lebih dari 0.\n");
+                if(data.tersedia <= 0){
+                    printf("\n" ANSI_BOLD ANSI_RED "✘ ERROR: Stok awal harus lebih dari 0." ANSI_RESET "\n");
                     break;
                 }
-                data.tersedia = data.stokTotal;
                 data.dipinjam = 0;
                 data.rusak = 0;
                 data.habis = 0;
@@ -113,64 +120,62 @@ int main(){
                 break;
             
             case 2:
-                printf("\nMasukkan ID Item : ");
-                fgets(id, 15, stdin);
+                printf("\n" ANSI_BOLD ANSI_RED ">>> HAPUS ITEM <<<" ANSI_RESET "\n");
+                printf("Masukkan ID Item : ");
+                fgets(id, sizeof(id), stdin);
                 hapusEnter(id);
                 deleteItem(&inventaris, id, &status);
                 tampilStatus(status);
                 break;
 
             case 3:
-                printf("\nMasukkan ID Item : ");
-                fgets(id, 15, stdin);
+                printf("\n" ANSI_BOLD ANSI_CYAN ">>> CARI ITEM <<<" ANSI_RESET "\n");
+                printf("Masukkan ID Item : ");
+                fgets(id, sizeof(id), stdin);
                 hapusEnter(id);
                 curr = inventaris;
                 while(curr != NULL){
                     if(strcmp(curr->id, id) == 0){
-                        printf("\n=====================================\n");
-                        printf("ID           : %s\n", curr->id);
-                        printf("Nama         : %s\n", curr->nama);
-                        printf("Kategori     : %s\n", curr->kategori);
-                        printf("Lokasi       : %s\n", curr->lokasi);
-                        printf("Pemilik      : %s\n", curr->pemilik);
-                        printf("PIC          : %s\n", curr->pic);
-                        printf("Stok Total   : %d\n", curr->stokTotal);
-                        printf("Tersedia     : %d\n", curr->tersedia);
-                        printf("Dipinjam     : %d\n", curr->dipinjam);
-                        printf("Rusak        : %d\n", curr->rusak);
-                        printf("Habis        : %d\n", curr->habis);
-                        printf("=====================================\n");
-
+                        printf("\n" ANSI_GRAY "┌────────────────────────────────────────┐" ANSI_RESET "\n");
+                        printf(ANSI_GRAY "│" ANSI_RESET " " ANSI_BOLD ANSI_CYAN "             DETAIL BARANG            " ANSI_RESET " " ANSI_GRAY "│" ANSI_RESET "\n");
+                        printf(ANSI_GRAY "├────────────────────────────────────────┤" ANSI_RESET "\n");
+                        printf(ANSI_GRAY "│" ANSI_RESET " ID           : %-22s " ANSI_GRAY "│" ANSI_RESET "\n", curr->id);
+                        printf(ANSI_GRAY "│" ANSI_RESET " Nama         : %-22s " ANSI_GRAY "│" ANSI_RESET "\n", curr->nama);
+                        printf(ANSI_GRAY "│" ANSI_RESET " Kategori     : %-22s " ANSI_GRAY "│" ANSI_RESET "\n", curr->kategori);
+                        printf(ANSI_GRAY "│" ANSI_RESET " Lokasi       : %-22s " ANSI_GRAY "│" ANSI_RESET "\n", curr->lokasi);
+                        printf(ANSI_GRAY "│" ANSI_RESET " Pemilik      : %-22s " ANSI_GRAY "│" ANSI_RESET "\n", curr->pemilik);
+                        printf(ANSI_GRAY "│" ANSI_RESET " PIC          : %-22s " ANSI_GRAY "│" ANSI_RESET "\n", curr->pic);
+                        printf(ANSI_GRAY "├────────────────────────────────────────┤" ANSI_RESET "\n");
+                        printf(ANSI_GRAY "│" ANSI_RESET " Stok Total   : %-22d " ANSI_GRAY "│" ANSI_RESET "\n", getStokTotal(curr));
+                        printf(ANSI_GRAY "│" ANSI_RESET " Tersedia     : " ANSI_GREEN "%-22d" ANSI_RESET " " ANSI_GRAY "│" ANSI_RESET "\n", curr->tersedia);
+                        printf(ANSI_GRAY "│" ANSI_RESET " Dipinjam     : " ANSI_YELLOW "%-22d" ANSI_RESET " " ANSI_GRAY "│" ANSI_RESET "\n", curr->dipinjam);
+                        printf(ANSI_GRAY "│" ANSI_RESET " Rusak        : " ANSI_RED "%-22d" ANSI_RESET " " ANSI_GRAY "│" ANSI_RESET "\n", curr->rusak);
+                        printf(ANSI_GRAY "│" ANSI_RESET " Habis        : " ANSI_RED "%-22d" ANSI_RESET " " ANSI_GRAY "│" ANSI_RESET "\n", curr->habis);
+                        printf(ANSI_GRAY "└────────────────────────────────────────┘" ANSI_RESET "\n");
                         break;
                     }
                     curr = curr->next;
                 }
                 if(curr == NULL){
-                    printf("\nID tidak ditemukan.\n");
+                    printf("\n" ANSI_BOLD ANSI_RED "✘ ERROR: ID tidak ditemukan." ANSI_RESET "\n");
                 }
                 break;
 
             case 4:
                 if(inventaris == NULL){
-                    printf("\nData inventaris kosong.\n");
+                    printf("\n" ANSI_BOLD ANSI_YELLOW "⚠ Data inventaris kosong." ANSI_RESET "\n");
                     break;
                 }
-                printf("\n====================================================================================================\n");
-                printf("%-12s %-20s %-8s %-10s %-10s %-8s %-8s\n",
-                       "ID",
-                       "Nama",
-                       "Total",
-                       "Tersedia",
-                       "Dipinjam",
-                       "Rusak",
-                       "Habis");
-                printf("====================================================================================================\n");
+                printf("\n" ANSI_GRAY "┌──────────┬──────────────────────┬──────────┬──────────┬──────────┬──────────┬──────────┐" ANSI_RESET "\n");
+                printf(ANSI_GRAY "│" ANSI_RESET " " ANSI_BOLD ANSI_CYAN "%-8s" ANSI_RESET " " ANSI_GRAY "│" ANSI_RESET " " ANSI_BOLD ANSI_CYAN "%-20s" ANSI_RESET " " ANSI_GRAY "│" ANSI_RESET " " ANSI_BOLD ANSI_CYAN "%-8s" ANSI_RESET " " ANSI_GRAY "│" ANSI_RESET " " ANSI_BOLD ANSI_CYAN "%-8s" ANSI_RESET " " ANSI_GRAY "│" ANSI_RESET " " ANSI_BOLD ANSI_CYAN "%-8s" ANSI_RESET " " ANSI_GRAY "│" ANSI_RESET " " ANSI_BOLD ANSI_CYAN "%-8s" ANSI_RESET " " ANSI_GRAY "│" ANSI_RESET " " ANSI_BOLD ANSI_CYAN "%-8s" ANSI_RESET " " ANSI_GRAY "│" ANSI_RESET "\n",
+                       "ID", "Nama Barang", "Total", "Tersedia", "Dipinjam", "Rusak", "Habis");
+                printf(ANSI_GRAY "├──────────┼──────────────────────┼──────────┼──────────┼──────────┼──────────┼──────────┤" ANSI_RESET "\n");
                 curr = inventaris;
                 while(curr != NULL){
-                    printf("%-12s %-20s %-8d %-10d %-10d %-8d %-8d\n",
+                    printf(ANSI_GRAY "│" ANSI_RESET " %-8s " ANSI_GRAY "│" ANSI_RESET " %-20s " ANSI_GRAY "│" ANSI_RESET " %8d " ANSI_GRAY "│" ANSI_RESET " " ANSI_GREEN "%8d" ANSI_RESET " " ANSI_GRAY "│" ANSI_RESET " " ANSI_YELLOW "%8d" ANSI_RESET " " ANSI_GRAY "│" ANSI_RESET " " ANSI_RED "%8d" ANSI_RESET " " ANSI_GRAY "│" ANSI_RESET " " ANSI_RED "%8d" ANSI_RESET " " ANSI_GRAY "│" ANSI_RESET "\n",
                            curr->id,
                            curr->nama,
-                           curr->stokTotal,
+                           getStokTotal(curr),
                            curr->tersedia,
                            curr->dipinjam,
                            curr->rusak,
@@ -178,12 +183,13 @@ int main(){
 
                     curr = curr->next;
                 }
-                printf("====================================================================================================\n");
+                printf(ANSI_GRAY "└──────────┴──────────────────────┴──────────┴──────────┴──────────┴──────────┴──────────┘" ANSI_RESET "\n");
                 break;
 
             case 5:
-                printf("\nMasukkan ID Item : ");
-                fgets(id, 15, stdin);
+                printf("\n" ANSI_BOLD ANSI_CYAN ">>> TAMBAH STOK <<<" ANSI_RESET "\n");
+                printf("Masukkan ID Item : ");
+                fgets(id, sizeof(id), stdin);
                 hapusEnter(id);
                 printf("Jumlah stok yang ditambahkan : ");
                 scanf("%d", &jumlah);
@@ -193,8 +199,9 @@ int main(){
                 break;
 
             case 6:
-                printf("\nMasukkan ID Item : ");
-                fgets(id, 15, stdin);
+                printf("\n" ANSI_BOLD ANSI_RED ">>> KURANGI STOK <<<" ANSI_RESET "\n");
+                printf("Masukkan ID Item : ");
+                fgets(id, sizeof(id), stdin);
                 hapusEnter(id);
                 printf("Jumlah stok yang dikurangi : ");
                 scanf("%d", &jumlah);
@@ -204,8 +211,9 @@ int main(){
                 break;
 
             case 7:
-                printf("\nMasukkan ID Item : ");
-                fgets(id, 15, stdin);
+                printf("\n" ANSI_BOLD ANSI_YELLOW ">>> PINJAM ITEM <<<" ANSI_RESET "\n");
+                printf("Masukkan ID Item : ");
+                fgets(id, sizeof(id), stdin);
                 hapusEnter(id);
                 printf("Jumlah yang dipinjam : ");
                 scanf("%d", &jumlah);
@@ -215,8 +223,9 @@ int main(){
                 break;
 
             case 8:
-                printf("\nMasukkan ID Item : ");
-                fgets(id, 15, stdin);
+                printf("\n" ANSI_BOLD ANSI_GREEN ">>> KEMBALIKAN ITEM <<<" ANSI_RESET "\n");
+                printf("Masukkan ID Item : ");
+                fgets(id, sizeof(id), stdin);
                 hapusEnter(id);
                 printf("Jumlah yang dikembalikan : ");
                 scanf("%d", &jumlah);
@@ -226,8 +235,9 @@ int main(){
                 break;
 
             case 9:
-                printf("\nMasukkan ID Item : ");
-                fgets(id, 15, stdin);
+                printf("\n" ANSI_BOLD ANSI_RED ">>> TANDAI RUSAK <<<" ANSI_RESET "\n");
+                printf("Masukkan ID Item : ");
+                fgets(id, sizeof(id), stdin);
                 hapusEnter(id);
                 printf("Jumlah item rusak : ");
                 scanf("%d", &jumlah);
@@ -237,8 +247,9 @@ int main(){
                 break;
 
             case 10:
-                printf("\nMasukkan ID Item : ");
-                fgets(id, 15, stdin);
+                printf("\n" ANSI_BOLD ANSI_RED ">>> TANDAI HABIS <<<" ANSI_RESET "\n");
+                printf("Masukkan ID Item : ");
+                fgets(id, sizeof(id), stdin);
                 hapusEnter(id);
                 printf("Jumlah item habis : ");
                 scanf("%d", &jumlah);
@@ -258,29 +269,76 @@ int main(){
                 curr = inventaris;
                 while(curr != NULL){
                     totalItem++;
-                    totalStok += curr->stokTotal;
+                    totalStok += getStokTotal(curr);
                     totalTersedia += curr->tersedia;
                     totalDipinjam += curr->dipinjam;
                     totalRusak += curr->rusak;
                     totalHabis += curr->habis;
                     curr = curr->next;
                 }
-                printf("\n========== RINGKASAN INVENTARIS ==========\n");
-                printf("Jumlah Item      : %d\n", totalItem);
-                printf("Total Stok       : %d\n", totalStok);
-                printf("Total Tersedia   : %d\n", totalTersedia);
-                printf("Total Dipinjam   : %d\n", totalDipinjam);
-                printf("Total Rusak      : %d\n", totalRusak);
-                printf("Total Habis      : %d\n", totalHabis);
-                printf("==========================================\n");
+
+                printf("\n" ANSI_GRAY "┌──────────────────────────────────────────────────────────────────────┐" ANSI_RESET "\n");
+                printf(ANSI_GRAY "│" ANSI_RESET " " ANSI_BOLD ANSI_CYAN "                         RINGKASAN INVENTARIS                         " ANSI_RESET " " ANSI_GRAY "│" ANSI_RESET "\n");
+                printf(ANSI_GRAY "├──────────────────────────────────────────────────────────────────────┤" ANSI_RESET "\n");
+                printf(ANSI_GRAY "│" ANSI_RESET "  Total Jenis Barang : " ANSI_BOLD "%-44d" ANSI_RESET "   " ANSI_GRAY "│" ANSI_RESET "\n", totalItem);
+                printf(ANSI_GRAY "│" ANSI_RESET "  Total Unit Fisik   : " ANSI_BOLD "%-44d" ANSI_RESET "   " ANSI_GRAY "│" ANSI_RESET "\n", totalStok);
+                printf(ANSI_GRAY "├──────────────────────────────────────────────────────────────────────┤" ANSI_RESET "\n");
+
+                // Print bar chart for each category
+                // We use 30 visual columns for the bar (filled with ■ or spaces)
+                // Tersedia
+                {
+                    int fill = (totalStok > 0) ? (totalTersedia * 30 / totalStok) : 0;
+                    double pct = (totalStok > 0) ? (totalTersedia * 100.0 / totalStok) : 0.0;
+                    printf(ANSI_GRAY "│" ANSI_RESET "  %-10s : " ANSI_GREEN, "Tersedia");
+                    for(int i=0; i<30; i++) {
+                        if(i < fill) printf("■");
+                        else printf(" ");
+                    }
+                    printf(ANSI_RESET "  %4d unit (%5.1f%%)    " ANSI_GRAY "│" ANSI_RESET "\n", totalTersedia, pct);
+                }
+                // Dipinjam
+                {
+                    int fill = (totalStok > 0) ? (totalDipinjam * 30 / totalStok) : 0;
+                    double pct = (totalStok > 0) ? (totalDipinjam * 100.0 / totalStok) : 0.0;
+                    printf(ANSI_GRAY "│" ANSI_RESET "  %-10s : " ANSI_YELLOW, "Dipinjam");
+                    for(int i=0; i<30; i++) {
+                        if(i < fill) printf("■");
+                        else printf(" ");
+                    }
+                    printf(ANSI_RESET "  %4d unit (%5.1f%%)    " ANSI_GRAY "│" ANSI_RESET "\n", totalDipinjam, pct);
+                }
+                // Rusak
+                {
+                    int fill = (totalStok > 0) ? (totalRusak * 30 / totalStok) : 0;
+                    double pct = (totalStok > 0) ? (totalRusak * 100.0 / totalStok) : 0.0;
+                    printf(ANSI_GRAY "│" ANSI_RESET "  %-10s : " ANSI_RED, "Rusak");
+                    for(int i=0; i<30; i++) {
+                        if(i < fill) printf("■");
+                        else printf(" ");
+                    }
+                    printf(ANSI_RESET "  %4d unit (%5.1f%%)    " ANSI_GRAY "│" ANSI_RESET "\n", totalRusak, pct);
+                }
+                // Habis
+                {
+                    int fill = (totalStok > 0) ? (totalHabis * 30 / totalStok) : 0;
+                    double pct = (totalStok > 0) ? (totalHabis * 100.0 / totalStok) : 0.0;
+                    printf(ANSI_GRAY "│" ANSI_RESET "  %-10s : " ANSI_RED, "Habis");
+                    for(int i=0; i<30; i++) {
+                        if(i < fill) printf("■");
+                        else printf(" ");
+                    }
+                    printf(ANSI_RESET "  %4d unit (%5.1f%%)    " ANSI_GRAY "│" ANSI_RESET "\n", totalHabis, pct);
+                }
+                printf(ANSI_GRAY "└──────────────────────────────────────────────────────────────────────┘" ANSI_RESET "\n");
                 break;
             }
 
             case 0:
-                printf("\nProgram selesai.\n");
+                printf("\n" ANSI_BOLD ANSI_GREEN "Program selesai. Sampai jumpa!" ANSI_RESET "\n");
                 break;
             default:
-                printf("\nMenu tidak valid.\n");
+                printf("\n" ANSI_BOLD ANSI_RED "⚠ Menu tidak valid." ANSI_RESET "\n");
         }
 
     }while(menu != 0);

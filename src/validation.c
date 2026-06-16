@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
-#include "../include/validation.h"
+#include "validation.h"
+#include "memory.h"
+#include "inventory.h"
 
 void checkDuplicate(List L, char id[], int *duplicate){
     List curr;
