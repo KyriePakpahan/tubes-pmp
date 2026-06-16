@@ -42,23 +42,22 @@ int main() {
         // 1. TAMBAH ITEM
         if (strcmp(command, "ADD") == 0) {
             item data;
-            fscanf(fin, "%s %s %s %s %s %s %d", 
-                   data.id, data.nama, data.kategori, 
-                   data.lokasi, data.pemilik, data.pic, &data.stokTotal);
-            
-            data.tersedia = data.stokTotal;
+            fscanf(fin, "%7s %19s %14s %9s %14s %14s %hd",
+                   data.id, data.nama, data.kategori,
+                   data.lokasi, data.pemilik, data.pic, &data.tersedia);
+
             data.dipinjam = 0;
             data.rusak = 0;
             data.habis = 0;
             
             tambahItem(&inventaris, data, &status);
-            fprintf(fout, "[TEST: ADD] Menambahkan ID: %s | Nama: %s | Stok: %d\n", data.id, data.nama, data.stokTotal);
+            fprintf(fout, "[TEST: ADD] Menambahkan ID: %s | Nama: %s | Stok: %d\n", data.id, data.nama, data.tersedia);
             fprintf(fout, "   -> HASIL: %s\n\n", getStatusText(status));
         }
         // 2. HAPUS ITEM
         else if (strcmp(command, "DELETE") == 0) {
-            char id[15];
-            fscanf(fin, "%s", id);
+            char id[8];
+            fscanf(fin, "%7s", id);
             
             deleteItem(&inventaris, id, &status);
             fprintf(fout, "[TEST: DELETE] Menghapus ID %s dari sistem\n", id);
@@ -66,10 +65,10 @@ int main() {
         }
         // 3. CARI ITEM
         else if (strcmp(command, "FIND") == 0) {
-            char id[15];
-            fscanf(fin, "%s", id);
+            char id[8];
+            fscanf(fin, "%7s", id);
             fprintf(fout, "[TEST: FIND] Mencari ID %s dalam sistem\n", id);
-            
+
             List curr = inventaris;
             int found = 0;
             while(curr != NULL){
@@ -90,25 +89,25 @@ int main() {
             if (inventaris == NULL) {
                 fprintf(fout, "   -> HASIL: Data inventaris kosong.\n\n");
             } else {
-                fprintf(fout, "------------------------------------------------------------------------------------\n");
-                fprintf(fout, "%-12s %-20s %-8s %-10s %-10s %-8s %-8s\n",
-                       "ID", "Nama", "Total", "Tersedia", "Dipinjam", "Rusak", "Habis");
-                fprintf(fout, "------------------------------------------------------------------------------------\n");
+                fprintf(fout, "┌──────────┬──────────────────────┬──────────┬──────────┬──────────┬──────────┬──────────┐\n");
+                fprintf(fout, "│ %-8s │ %-20s │ %-8s │ %-8s │ %-8s │ %-8s │ %-8s │\n",
+                       "ID", "Nama Barang", "Total", "Tersedia", "Dipinjam", "Rusak", "Habis");
+                fprintf(fout, "├──────────┼──────────────────────┼──────────┼──────────┼──────────┼──────────┼──────────┤\n");
                 List curr = inventaris;
                 while(curr != NULL){
-                    fprintf(fout, "%-12s %-20s %-8d %-10d %-10d %-8d %-8d\n",
-                           curr->id, curr->nama, curr->stokTotal, curr->tersedia,
+                    fprintf(fout, "│ %-8s │ %-20s │ %8d │ %8d │ %8d │ %8d │ %8d │\n",
+                           curr->id, curr->nama, getStokTotal(curr), curr->tersedia,
                            curr->dipinjam, curr->rusak, curr->habis);
                     curr = curr->next;
                 }
-                fprintf(fout, "------------------------------------------------------------------------------------\n\n");
+                fprintf(fout, "└──────────┴──────────────────────┴──────────┴──────────┴──────────┴──────────┴──────────┘\n\n");
             }
         }
         // 5. TAMBAH STOK
         else if (strcmp(command, "ADD_STOCK") == 0) {
-            char id[15];
+            char id[8];
             int jumlah;
-            fscanf(fin, "%s %d", id, &jumlah);
+            fscanf(fin, "%7s %d", id, &jumlah);
             
             tambahStok(inventaris, id, jumlah, &status);
             fprintf(fout, "[TEST: ADD_STOCK] Tambah stok %d unit ke ID %s\n", jumlah, id);
@@ -116,9 +115,9 @@ int main() {
         }
         // 6. KURANGI STOK
         else if (strcmp(command, "REDUCE_STOCK") == 0) {
-            char id[15];
+            char id[8];
             int jumlah;
-            fscanf(fin, "%s %d", id, &jumlah);
+            fscanf(fin, "%7s %d", id, &jumlah);
             
             kurangiStok(inventaris, id, jumlah, &status);
             fprintf(fout, "[TEST: REDUCE_STOCK] Kurangi stok %d unit dari ID %s\n", jumlah, id);
@@ -126,9 +125,9 @@ int main() {
         }
         // 7. PINJAM ITEM
         else if (strcmp(command, "PINJAM") == 0) {
-            char id[15];
+            char id[8];
             int jumlah;
-            fscanf(fin, "%s %d", id, &jumlah);
+            fscanf(fin, "%7s %d", id, &jumlah);
             
             pinjamItem(inventaris, id, jumlah, &status);
             fprintf(fout, "[TEST: PINJAM] Pinjam %d unit dari ID %s\n", jumlah, id);
@@ -136,9 +135,9 @@ int main() {
         }
         // 8. KEMBALIKAN ITEM
         else if (strcmp(command, "KEMBALI") == 0) {
-            char id[15];
+            char id[8];
             int jumlah;
-            fscanf(fin, "%s %d", id, &jumlah);
+            fscanf(fin, "%7s %d", id, &jumlah);
             
             kembalikanItem(inventaris, id, jumlah, &status);
             fprintf(fout, "[TEST: KEMBALI] Kembalikan %d unit ke ID %s\n", jumlah, id);
@@ -146,9 +145,9 @@ int main() {
         }
         // 9. TANDAI RUSAK
         else if (strcmp(command, "RUSAK") == 0) {
-            char id[15];
+            char id[8];    
             int jumlah;
-            fscanf(fin, "%s %d", id, &jumlah);
+            fscanf(fin, "%7s %d", id, &jumlah);
             
             tandaiRusak(inventaris, id, jumlah, &status);
             fprintf(fout, "[TEST: RUSAK] Tandai rusak %d unit pada ID %s\n", jumlah, id);
@@ -156,9 +155,9 @@ int main() {
         }
         // 10. TANDAI HABIS
         else if (strcmp(command, "HABIS") == 0) {
-            char id[15];
+            char id[8];
             int jumlah;
-            fscanf(fin, "%s %d", id, &jumlah);
+            fscanf(fin, "%7s %d", id, &jumlah);
             
             tandaiHabis(inventaris, id, jumlah, &status);
             fprintf(fout, "[TEST: HABIS] Tandai habis %d unit pada ID %s\n", jumlah, id);
@@ -170,16 +169,21 @@ int main() {
             int tItem = 0, tStok = 0, tSedia = 0, tPinjam = 0, tRusak = 0, tHabis = 0;
             List curr = inventaris;
             while(curr != NULL){
-                tItem++; tStok += curr->stokTotal; tSedia += curr->tersedia;
+                tItem++; tStok += getStokTotal(curr); tSedia += curr->tersedia;
                 tPinjam += curr->dipinjam; tRusak += curr->rusak; tHabis += curr->habis;
                 curr = curr->next;
             }
-            fprintf(fout, "   -> Total Item Unik : %d\n", tItem);
-            fprintf(fout, "   -> Total Unit Fisik: %d\n", tStok);
-            fprintf(fout, "   -> Total Tersedia  : %d\n", tSedia);
-            fprintf(fout, "   -> Sedang Dipinjam : %d\n", tPinjam);
-            fprintf(fout, "   -> Kondisi Rusak   : %d\n", tRusak);
-            fprintf(fout, "   -> Kondisi Habis   : %d\n\n", tHabis);
+            fprintf(fout, "┌────────────────────────────────────────┐\n");
+            fprintf(fout, "│          RINGKASAN INVENTARIS          │\n");
+            fprintf(fout, "├────────────────────────────────────────┤\n");
+            fprintf(fout, "│ Total Jenis Barang : %-17d │\n", tItem);
+            fprintf(fout, "│ Total Unit Fisik   : %-17d │\n", tStok);
+            fprintf(fout, "├────────────────────────────────────────┤\n");
+            fprintf(fout, "│ Tersedia  : %4d unit (%5.1f%%)         │\n", tSedia, (tStok > 0) ? (tSedia * 100.0 / tStok) : 0.0);
+            fprintf(fout, "│ Dipinjam  : %4d unit (%5.1f%%)         │\n", tPinjam, (tStok > 0) ? (tPinjam * 100.0 / tStok) : 0.0);
+            fprintf(fout, "│ Rusak     : %4d unit (%5.1f%%)         │\n", tRusak, (tStok > 0) ? (tRusak * 100.0 / tStok) : 0.0);
+            fprintf(fout, "│ Habis     : %4d unit (%5.1f%%)         │\n", tHabis, (tStok > 0) ? (tHabis * 100.0 / tStok) : 0.0);
+            fprintf(fout, "└────────────────────────────────────────┘\n\n");
         }
     }
 

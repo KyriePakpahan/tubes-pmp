@@ -1,0 +1,7 @@
+ESP-01 ESP32_Micro_Board Mikrokontroler Lab_EE Pak_Nana Ken 10
+RSP-04 Raspberry_Pi_4 SBC Lab_EE Pak_Nana Ken 5
+ARD-01 Arduino_Uno Mikrokontroler Lab_EE Pak_Infall Ken 20
+LDR-02 Sensor_LDR Sensor Lab_Fisika Pak_Budi Azka 50
+MOT-01 Servo_Motor_SG90 Aktuator Lab_Robo Pak_Yusuf Kuri 15
+LCD-01 I2C_LCD_16x2 Display Lab_EE Pak_Infall Kyrie 8
+MUL-01 Multimeter_Digital Alat_Ukur Lab_EE Pak_Nana Kenneth 4
