@@ -2,24 +2,46 @@
 #include <string.h>
 #include "memory.h"
 
-void insertLast(List *L, item data, int *status){
-    List baru, curr;
-    baru = (List) malloc(sizeof(item));
+int compareIDs(const char *id1, const char *id2) {
+    if (id1 == NULL || id2 == NULL) return 0;
+    if (id1[0] != id2[0]) {
+        return id1[0] - id2[0];
+    }
+
+    int num1 = atoi(id1 + 1);
+    int num2 = atoi(id2 + 1);
+    return num1 - num2;
+}
+
+void insertSorted(List *L, Item data, int *status){
+    List baru, curr, prev;
+    baru = (List) malloc(sizeof(Item));
     if(baru == NULL){
         *status = 5;
         return;
     }
-    memcpy(baru, &data, sizeof(item));
+    memcpy(baru, &data, sizeof(Item));
     baru->next = NULL;
+    
     if(*L == NULL){
         *L = baru;
     }
     else{
         curr = *L;
-        while(curr->next != NULL){
+        prev = NULL;
+        while(curr != NULL && compareIDs(curr->id, baru->id) < 0){
+            prev = curr;
             curr = curr->next;
         }
-        curr->next = baru;
+        
+        if(prev == NULL){
+            baru->next = *L;
+            *L = baru;
+        }
+        else{
+            baru->next = curr;
+            prev->next = baru;
+        }
     }
     *status = 0;
 }

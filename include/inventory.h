@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-void tambahItem(List *L, item data, int *status);
+void tambahItem(List *L, Item *data, int *status);
 void deleteItem(List *L, char id[], int *status);
 void tambahStok(List L, char id[], int jumlah, int *status);
 void kurangiStok(List L, char id[], int jumlah, int *status);

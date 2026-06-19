@@ -7,7 +7,8 @@
 extern "C" {
 #endif
 
-void insertLast(List *L, item data, int *status);
+int compareIDs(const char *id1, const char *id2);
+void insertSorted(List *L, Item data, int *status);
 void deleteItem(List *L, char id[], int *status);
 void isEmpty(List L, int *kosong);
 

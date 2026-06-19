@@ -4,25 +4,25 @@
 #include <stdint.h>
 #include <stddef.h>
 
-typedef struct item{
+typedef struct Item{
     char id[8];          
     char nama[20];      
-    char kategori[15];   
-    char lokasi[8];   
-    char pemilik[10];    
-    char pic[8];        
-    int16_t tersedia;
-    int16_t dipinjam;
-    int16_t rusak;
-    int16_t habis;
-    struct item *next;
-} item;
+    uint8_t kategoriIdx;
+    uint8_t lokasiIdx;
+    uint8_t pemilikIdx;
+    uint8_t picIdx;
+    uint8_t tersedia;
+    uint8_t dipinjam;
+    uint8_t rusak;
+    uint8_t habis;
+    struct Item *next;
+} Item;
 
-typedef item* List;
+typedef Item* List;
 
-static inline int16_t getStokTotal(const item *it) {
+static inline int16_t getStokTotal(const Item *it) {
     if (it == NULL) return 0;
-    return it->tersedia + it->dipinjam + it->rusak + it->habis;
+    return (int16_t)it->tersedia + it->dipinjam + it->rusak + it->habis;
 }
 
 #endif

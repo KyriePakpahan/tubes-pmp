@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 #define EEPROM_SIZE 1024
-#define MAGIC_NUMBER 0xAC
+#define MAGIC_NUMBER 0xB2
 #define MAX_ITEMS 100
 
 typedef void (*LogFunc)(const char *msg);

@@ -10,6 +10,8 @@ extern "C" {
 void checkDuplicate(List L, char id[], int *duplicate);
 void checkPositive(int value, int *valid);
 void checkMemory(int *penuh);
+void normalisasiNama(char *nama);
+void checkDuplicateName(List L, const char *nama, int *duplicate);
 
 #ifdef __cplusplus
 }

@@ -3,6 +3,23 @@
 #include <avr/eeprom.h>
 #include "eeprom_action.h"
 #include "memory.h"
+#include "lookup.h"
+
+#ifdef ARDUINO
+#include <Arduino.h>
+#include <avr/pgmspace.h>
+static void logPgm(LogFunc log, const char *msgFlash) {
+    if (log) {
+        char buf[64];
+        strncpy_P(buf, msgFlash, sizeof(buf) - 1);
+        buf[sizeof(buf) - 1] = '\0';
+        log(buf);
+    }
+}
+#else
+// compatibility stubs
+#define logPgm(log, msg) if (log) log(msg)
+#endif
 
 static void writeByteToEEPROM(int *addr, uint8_t val, uint16_t *checksum) {
     eeprom_update_byte((uint8_t *)(*addr), val);
@@ -19,9 +36,16 @@ static void writeFixedFieldToEEPROM(int *addr, const char *src, int maxLen, uint
     writeByteToEEPROM(addr, '\0', checksum);
 }
 
-static void writeInt16ToEEPROM(int *addr, int16_t val, uint16_t *checksum) {
-    writeByteToEEPROM(addr, (val >> 8) & 0xFF, checksum);
-    writeByteToEEPROM(addr, val & 0xFF, checksum);
+static void writeLookupFieldToEEPROM(int *addr, uint8_t tableId, uint8_t idx, uint16_t *checksum) {
+    if (idx < 128) {
+        writeByteToEEPROM(addr, idx, checksum);
+    } else {
+        // dynamic custom string
+        writeByteToEEPROM(addr, 255, checksum);
+        char buf[32];
+        getLookupString(tableId, idx, buf, sizeof(buf));
+        writeFixedFieldToEEPROM(addr, buf, sizeof(buf), checksum);
+    }
 }
 
 static void readByteFromEEPROM(int *addr, uint8_t *val, uint16_t *checksum) {
@@ -42,7 +66,7 @@ static void readStringFromEEPROM(int *addr, char *dest, int maxLen, uint16_t *ch
         i++;
     }
     dest[maxLen - 1] = '\0';
-    // Consume remaining bytes in EEPROM if the string was longer than maxLen-1
+    // consume remaining bytes in EEPROM if the string was longer than maxLen-1
     while (1) {
         uint8_t b;
         readByteFromEEPROM(addr, &b, checksum);
@@ -50,21 +74,62 @@ static void readStringFromEEPROM(int *addr, char *dest, int maxLen, uint16_t *ch
     }
 }
 
-static void readInt16FromEEPROM(int *addr, int16_t *val, uint16_t *checksum) {
-    uint8_t hi, lo;
-    readByteFromEEPROM(addr, &hi, checksum);
-    readByteFromEEPROM(addr, &lo, checksum);
-    *val = ((int16_t)hi << 8) | lo;
+static void readLookupFieldFromEEPROM(int *addr, uint8_t tableId, uint8_t *idx, uint16_t *checksum) {
+    uint8_t val;
+    readByteFromEEPROM(addr, &val, checksum);
+    if (val != 255) {
+        *idx = val;
+    } else {
+        // dynamic custom string
+        char buf[32];
+        readStringFromEEPROM(addr, buf, sizeof(buf), checksum);
+        *idx = registerLookup(tableId, buf);
+    }
 }
 
-static int getRequiredSize(item *it) {
+static int getRequiredSize(const Item *it) {
     int len_id = strnlen(it->id, 7);
     int len_nama = strnlen(it->nama, 19);
-    int len_kategori = strnlen(it->kategori, 14);
-    int len_lokasi = strnlen(it->lokasi, 7);
-    int len_pemilik = strnlen(it->pemilik, 9);
-    int len_pic = strnlen(it->pic, 7);
-    return len_id + len_nama + len_kategori + len_lokasi + len_pemilik + len_pic + 6 + 8;
+    int size = len_id + 1 + len_nama + 1; // strings + null-terminators
+    
+    // Kategori
+    if (it->kategoriIdx < 128) {
+        size += 1;
+    } else {
+        char buf[32];
+        getLookupString(TABLE_KATEGORI, it->kategoriIdx, buf, sizeof(buf));
+        size += 1 + strlen(buf) + 1;
+    }
+
+    // Lokasi
+    if (it->lokasiIdx < 128) {
+        size += 1;
+    } else {
+        char buf[32];
+        getLookupString(TABLE_LOKASI, it->lokasiIdx, buf, sizeof(buf));
+        size += 1 + strlen(buf) + 1;
+    }
+
+    // Pemilik
+    if (it->pemilikIdx < 128) {
+        size += 1;
+    } else {
+        char buf[32];
+        getLookupString(TABLE_PEMILIK, it->pemilikIdx, buf, sizeof(buf));
+        size += 1 + strlen(buf) + 1;
+    }
+
+    // PIC
+    if (it->picIdx < 128) {
+        size += 1;
+    } else {
+        char buf[32];
+        getLookupString(TABLE_PIC, it->picIdx, buf, sizeof(buf));
+        size += 1 + strlen(buf) + 1;
+    }
+
+    size += 4;
+    return size;
 }
 
 void saveToEEPROM(List L, LogFunc log) {
@@ -79,20 +144,20 @@ void saveToEEPROM(List L, LogFunc log) {
     while (curr != NULL) {
         int required = getRequiredSize(curr);
         if (addr + required > EEPROM_SIZE) {
-            if (log) log("[ERROR] EEPROM penuh, tidak semua data tersimpan");
+            logPgm(log, PSTR("[ERROR] EEPROM penuh, tidak semua data tersimpan"));
             break;
         }
 
         writeFixedFieldToEEPROM(&addr, curr->id, sizeof(curr->id), &header.checksum);
         writeFixedFieldToEEPROM(&addr, curr->nama, sizeof(curr->nama), &header.checksum);
-        writeFixedFieldToEEPROM(&addr, curr->kategori, sizeof(curr->kategori), &header.checksum);
-        writeFixedFieldToEEPROM(&addr, curr->lokasi, sizeof(curr->lokasi), &header.checksum);
-        writeFixedFieldToEEPROM(&addr, curr->pemilik, sizeof(curr->pemilik), &header.checksum);
-        writeFixedFieldToEEPROM(&addr, curr->pic, sizeof(curr->pic), &header.checksum);
-        writeInt16ToEEPROM(&addr, curr->tersedia, &header.checksum);
-        writeInt16ToEEPROM(&addr, curr->dipinjam, &header.checksum);
-        writeInt16ToEEPROM(&addr, curr->rusak, &header.checksum);
-        writeInt16ToEEPROM(&addr, curr->habis, &header.checksum);
+        writeLookupFieldToEEPROM(&addr, TABLE_KATEGORI, curr->kategoriIdx, &header.checksum);
+        writeLookupFieldToEEPROM(&addr, TABLE_LOKASI, curr->lokasiIdx, &header.checksum);
+        writeLookupFieldToEEPROM(&addr, TABLE_PEMILIK, curr->pemilikIdx, &header.checksum);
+        writeLookupFieldToEEPROM(&addr, TABLE_PIC, curr->picIdx, &header.checksum);
+        writeByteToEEPROM(&addr, curr->tersedia, &header.checksum);
+        writeByteToEEPROM(&addr, curr->dipinjam, &header.checksum);
+        writeByteToEEPROM(&addr, curr->rusak, &header.checksum);
+        writeByteToEEPROM(&addr, curr->habis, &header.checksum);
 
         savedCount++;
         curr = curr->next;
@@ -100,19 +165,19 @@ void saveToEEPROM(List L, LogFunc log) {
 
     header.itemCount = savedCount;
 
-    // Save header
+    // save header
     eeprom_update_byte((uint8_t *)0, header.magic);
     eeprom_update_byte((uint8_t *)1, (header.itemCount >> 8) & 0xFF);
     eeprom_update_byte((uint8_t *)2, header.itemCount & 0xFF);
     eeprom_update_byte((uint8_t *)3, (header.checksum >> 8) & 0xFF);
     eeprom_update_byte((uint8_t *)4, header.checksum & 0xFF);
 
-    if (log) log("[MEMORY] Data berhasil disimpan");
+    logPgm(log, PSTR("[MEMORY] Data berhasil disimpan"));
 }
 
 void loadFromEEPROM(List *L, LogFunc log) {
     EEPROMHeader header;
-    item data;
+    Item data;
     int status = 0;
 
     header.magic = eeprom_read_byte((const uint8_t *)0);
@@ -122,13 +187,13 @@ void loadFromEEPROM(List *L, LogFunc log) {
                     | eeprom_read_byte((const uint8_t *)4);
 
     if (header.magic != MAGIC_NUMBER) {
-        if (log) log("[MEMORY] Data kosong atau corrupt");
+        logPgm(log, PSTR("[MEMORY] Data kosong atau corrupt"));
         *L = NULL;
         return;
     }
 
     if (header.itemCount > MAX_ITEMS || header.itemCount == 0) {
-        if (log) log("[MEMORY] itemCount tidak valid");
+        logPgm(log, PSTR("[MEMORY] itemCount tidak valid"));
         *L = NULL;
         return;
     }
@@ -136,40 +201,43 @@ void loadFromEEPROM(List *L, LogFunc log) {
     int addr = sizeof(EEPROMHeader);
     uint16_t computedChecksum = 0;
 
+    // clear dynamic lookup tables to start fresh
+    initLookup();
+
     for (int i = 0; i < header.itemCount; i++) {
-        memset(&data, 0, sizeof(item));
+        memset(&data, 0, sizeof(Item));
 
         readStringFromEEPROM(&addr, data.id, sizeof(data.id), &computedChecksum);
         readStringFromEEPROM(&addr, data.nama, sizeof(data.nama), &computedChecksum);
-        readStringFromEEPROM(&addr, data.kategori, sizeof(data.kategori), &computedChecksum);
-        readStringFromEEPROM(&addr, data.lokasi, sizeof(data.lokasi), &computedChecksum);
-        readStringFromEEPROM(&addr, data.pemilik, sizeof(data.pemilik), &computedChecksum);
-        readStringFromEEPROM(&addr, data.pic, sizeof(data.pic), &computedChecksum);
-        readInt16FromEEPROM(&addr, &data.tersedia, &computedChecksum);
-        readInt16FromEEPROM(&addr, &data.dipinjam, &computedChecksum);
-        readInt16FromEEPROM(&addr, &data.rusak, &computedChecksum);
-        readInt16FromEEPROM(&addr, &data.habis, &computedChecksum);
+        readLookupFieldFromEEPROM(&addr, TABLE_KATEGORI, &data.kategoriIdx, &computedChecksum);
+        readLookupFieldFromEEPROM(&addr, TABLE_LOKASI, &data.lokasiIdx, &computedChecksum);
+        readLookupFieldFromEEPROM(&addr, TABLE_PEMILIK, &data.pemilikIdx, &computedChecksum);
+        readLookupFieldFromEEPROM(&addr, TABLE_PIC, &data.picIdx, &computedChecksum);
+        readByteFromEEPROM(&addr, &data.tersedia, &computedChecksum);
+        readByteFromEEPROM(&addr, &data.dipinjam, &computedChecksum);
+        readByteFromEEPROM(&addr, &data.rusak, &computedChecksum);
+        readByteFromEEPROM(&addr, &data.habis, &computedChecksum);
 
         data.next = NULL;
-        insertLast(L, data, &status);
+        insertSorted(L, data, &status);
 
-        if (status != 0 && log) {
-            log("[MEMORY] Error loading item");
+        if (status != 0) {
+            logPgm(log, PSTR("[MEMORY] Error loading item"));
         }
     }
 
     if (computedChecksum != header.checksum) {
-        if (log) log("[MEMORY] PERINGATAN: Checksum tidak cocok!");
+        logPgm(log, PSTR("[MEMORY] PERINGATAN: Checksum tidak cocok!"));
     }
 
-    if (log) log("[MEMORY] Data berhasil dimuat");
+    logPgm(log, PSTR("[MEMORY] Data berhasil dimuat"));
 }
 
 void clearEEPROM(LogFunc log) {
     for (int i = 0; i < EEPROM_SIZE; i++) {
         eeprom_update_byte((uint8_t *)i, 0);
     }
-    if (log) log("[MEMORY] Seluruh MEMORY sudah dihapus");
+    logPgm(log, PSTR("[MEMORY] Seluruh MEMORY sudah dihapus"));
 }
 
 void displayEEPROMInfo(LogFunc log) {
@@ -184,19 +252,19 @@ void displayEEPROMInfo(LogFunc log) {
     header.checksum = ((uint16_t)eeprom_read_byte((const uint8_t *)3) << 8)
                     | eeprom_read_byte((const uint8_t *)4);
 
-    log("====== INFO MEMORY ======");
+    logPgm(log, PSTR("====== INFO MEMORY ======"));
     if (header.magic == MAGIC_NUMBER) {
-        log("Status: VALID");
+        logPgm(log, PSTR("Status: VALID"));
     } else {
-        log("Status: KOSONG/CORRUPT");
+        logPgm(log, PSTR("Status: KOSONG/CORRUPT"));
     }
     
-    log("Jumlah Item:");
+    logPgm(log, PSTR("Jumlah Item:"));
     itoa(header.itemCount, msg, 10);
     log(msg);
     
-    log("Checksum:");
+    logPgm(log, PSTR("Checksum:"));
     itoa(header.checksum, msg, 16);
     log(msg);
-    log("========================");
+    logPgm(log, PSTR("========================"));
 }
