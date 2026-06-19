@@ -1,28 +1,28 @@
-ADD ESP-01 ESP32_Micro_Board Mikrokontroler Lab_EE Pak_Nana Ken 10
-ADD RSP-04 Raspberry_Pi_4 SBC Lab_EE Pak_Nana Ken 5
-ADD ARD-01 Arduino_Uno Mikrokontroler Lab_EE Pak_Infall Ken 20
+ADD ESP32_Micro_Board Mikrokontroler Lab_EE Pak_Nana Ken 10
+ADD Raspberry_Pi_4 SBC Lab_EE Pak_Nana Ken 5
+ADD Arduino_Uno Mikrokontroler Lab_EE Pak_Infall Ken 20
 
-ADD ESP-01 Duplikat_Board Mikrokontroler Lab_EE Pak_Nana Ken 5
+ADD ESP32_Micro_Board Mikrokontroler Lab_EE Pak_Nana Ken 5
 
 DISPLAY_ALL
 
-PINJAM ARD-01 5
-PINJAM RSP-04 3
-KEMBALI RSP-04 1
+PINJAM A1 5
+PINJAM R1 3
+KEMBALI R1 1
 
-ADD_STOCK ESP-01 5
-REDUCE_STOCK ARD-01 2
+ADD_STOCK E1 5
+REDUCE_STOCK A1 2
 
-RUSAK ESP-01 2
-HABIS ARD-01 1
+RUSAK E1 2
+HABIS A1 1
 
-FIND ESP-01
+FIND E1
 FIND GHO-99
 
 DISPLAY_ALL
 
-DELETE RSP-04
-KEMBALI RSP-04 1
-DELETE RSP-04
+DELETE R1
+KEMBALI R1 1
+DELETE R1
 
 SUMMARY

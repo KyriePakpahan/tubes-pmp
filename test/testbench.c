@@ -6,6 +6,7 @@
 #include "../include/inventory.h"
 #include "../include/memory.h"
 #include "../include/validation.h"
+#include "../include/lookup.h"
 
 const char* getStatusText(int status) {
     switch(status) {
@@ -17,6 +18,7 @@ const char* getStatusText(int status) {
         case 5: return "Memori penuh";
         case 6: return "Pengembalian melebihi pinjaman";
         case 7: return "Item masih dipinjam";
+        case 8: return "Nama barang sudah terdaftar";
         default: return "Status tidak diketahui";
     }
 }
@@ -34,6 +36,8 @@ int main() {
     char command[20];
     int status;
 
+    initLookup();
+
     fprintf(fout, "=================================================\n");
     fprintf(fout, "        AUTOMATED TESTBENCH - INVENTARIS\n");
     fprintf(fout, "=================================================\n\n");
@@ -41,16 +45,23 @@ int main() {
     while (fscanf(fin, "%s", command) != EOF) {
         // 1. TAMBAH ITEM
         if (strcmp(command, "ADD") == 0) {
-            item data;
-            fscanf(fin, "%7s %19s %14s %9s %14s %14s %hd",
-                   data.id, data.nama, data.kategori,
-                   data.lokasi, data.pemilik, data.pic, &data.tersedia);
+            Item data;
+            char kat[32], lok[32], pem[32], pic[32];
+            int tempTersedia;
 
+            fscanf(fin, "%19s %31s %31s %31s %31s %d",
+                   data.nama, kat, lok, pem, pic, &tempTersedia);
+
+            data.kategoriIdx = registerLookup(TABLE_KATEGORI, kat);
+            data.lokasiIdx = registerLookup(TABLE_LOKASI, lok);
+            data.pemilikIdx = registerLookup(TABLE_PEMILIK, pem);
+            data.picIdx = registerLookup(TABLE_PIC, pic);
+            data.tersedia = (uint8_t)tempTersedia;
             data.dipinjam = 0;
             data.rusak = 0;
             data.habis = 0;
             
-            tambahItem(&inventaris, data, &status);
+            tambahItem(&inventaris, &data, &status);
             fprintf(fout, "[TEST: ADD] Menambahkan ID: %s | Nama: %s | Stok: %d\n", data.id, data.nama, data.tersedia);
             fprintf(fout, "   -> HASIL: %s\n\n", getStatusText(status));
         }
@@ -191,8 +202,18 @@ int main() {
     fprintf(fout, "        TESTBENCH SELESAI DIEKSEKUSI\n");
     fprintf(fout, "=================================================\n");
     
+    // Free LL
+    List curr_node = inventaris;
+    while(curr_node != NULL) {
+        List temp = curr_node->next;
+        free(curr_node);
+        curr_node = temp;
+    }
+
     fclose(fin);
     fclose(fout);
+    
+    freeLookup();
     
     printf("Testing Comprehensive selesai! Cek file test/output/result.txt\n");
 
