@@ -2,22 +2,50 @@
 
 Project bahasa C untuk tugas besar PMP.
 
-## Compile
-# Mode Interaktif
-Untuk menjalankan aplikasi sistem inventaris dengan menu CLI interaktif:
-```bash
-make run
-```
-# Mode Testbench
-Untuk menjalankan pengujian komprehensif dari file testcase.txt dan menghasilkan laporan di test/output/result.txt:
-```bash
-make run_test
-```
-# Clean Build
-Untuk membersihkan file eksekusi (compiled files) dan riwayat output test:
-```bash
-make clean
-```
+## Compile & Menjalankan Program
+
+`Makefile` untuk mempermudah kompilasi dan eksekusi program di Komputer maupun upload ke board Arduino UNO.
+
+### 1. Bash Terminal Komputer
+
+- **Kompilasi dan Jalankan Program**:
+  ```bash
+  make run
+  ```
+  *Perintah ini akan mengompilasi program utama ke `build/program_inventaris` dan langsung menjalankannya.*
+
+- **Compile saja**:
+  ```bash
+  make all
+  ```
+
+- **Menjalankan Automated Testbench**:
+  ```bash
+  make run_test
+  ```
+  *Perintah ini akan mengompilasi dan mengeksekusi suite pengujian otomatis, memproses berkas input uji dan menuliskan laporannya ke `test/output/result.txt`.*
+
+- **Kompilasi Testbench Saja**:
+  ```bash
+  make testbench
+  ```
+
+### 2. Serial Monitor Arduino UNO
+
+- **Kompilasi & Flash/Upload ke Arduino**:
+  ```bash
+  make flash_main
+  ```
+  *Perintah ini menggunakan `arduino-cli` bawaan untuk mengompilasi secara bersih (`--clean`) dan mengunggah kode biner langsung ke board Arduino Uno pada port `/dev/ttyACM0`.*
+
+### 3. Pembersihan File Build
+
+- **Membersihkan File Eksekusi & Laporan**:
+  ```bash
+  make clean
+  ```
+  *Membersihkan berkas-berkas biner hasil kompilasi, berkas emulasi EEPROM, serta riwayat keluaran testbench.*
+
 
 # How to Commit
 
